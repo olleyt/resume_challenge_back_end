@@ -42,12 +42,9 @@ def lambda_handler(event, context):
     )
     
     status_code = response['ResponseMetadata']['HTTPStatusCode']
-    #print(f'Status code: {status_code}')
-    
-    print(f'Total visitor count after update {incremented_visitor_count}')
     
     message = {
-        'message': 'Execution started successfully!'
+        'message': f'Total visitor count after update {incremented_visitor_count}'
         }
         
     return {
