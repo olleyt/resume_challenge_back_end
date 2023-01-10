@@ -1,4 +1,5 @@
 import boto3
+import json
 
 dynamodb = boto3.resource('dynamodb')
 
@@ -40,8 +41,17 @@ def lambda_handler(event, context):
         }
     )
     
-    #status_code = response['ResponseMetadata']['HTTPStatusCode']
-    #print(status_code)
+    status_code = response['ResponseMetadata']['HTTPStatusCode']
+    #print(f'Status code: {status_code}')
+    
     print(f'Total visitor count after update {incremented_visitor_count}')
     
-    return incremented_visitor_count  
+    message = {
+        'message': 'Execution started successfully!'
+        }
+        
+    return {
+        'statusCode': status_code,
+        'headers': {'Content-Type': 'application/json'},
+        'body': json.dumps(message)
+    }
