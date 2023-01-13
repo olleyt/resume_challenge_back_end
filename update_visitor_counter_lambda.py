@@ -44,11 +44,16 @@ def lambda_handler(event, context):
     status_code = response['ResponseMetadata']['HTTPStatusCode']
     
     message = {
-        'message': f'Total visitor count after update {incremented_visitor_count}'
+        'message': f'Total visitor count: {incremented_visitor_count}'
         }
         
     return {
         'statusCode': status_code,
-        'headers': {'Content-Type': 'application/json'},
+        'headers': {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin" : "*", # Required for CORS support to work 
+            "Access-Control-Allow-Credentials" : True # Required for cookies, authorization headers with HTTPS
+            # access-control-allow-origin: "https://test.coolarchitect.link/"
+            },
         'body': json.dumps(message)
     }
