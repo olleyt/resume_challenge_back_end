@@ -58,9 +58,7 @@ def lambda_handler(event, context):
     status_code = update_item(table, 'visitor_count', 'total_count', incremented_visitor_count)
     
     updated_total_visitor_count = get_item_attr(table, 'visitor_count', 'total_count')
-    message = {
-        'message': f'Total visitor count: {updated_total_visitor_count}'
-        }
+    message = { 'count': f'{updated_total_visitor_count}' }
         
     return {
         'statusCode': status_code,
