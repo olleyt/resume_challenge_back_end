@@ -1,8 +1,13 @@
 import boto3
 import json
+import logging
 from botocore.exceptions import ClientError
 
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+# enable logging
+logger = logging.getLogger()
+logger.setLevel(logging.ERROR)
+
+#dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 
 def get_item_attr(table_name, partition_key, item_attribute):
     """
@@ -13,15 +18,21 @@ def get_item_attr(table_name, partition_key, item_attribute):
             Key={ partition_key: item_attribute}
             )
     except ClientError as err:
+        if err.response['Error']['Code'] == 'ValidationException':
+            raise KeyError("Item not found")
+        else:
             logger.error(
                 "Couldn't get visitor counter from table %s. Here's why: %s: %s",
-                self.table.name,
+                table_name,
                 err.response['Error']['Code'], err.response['Error']['Message'])
             raise
     else:        
+        if 'Item' not in response:
+            raise KeyError("Item not found")
         item = response['Item']
     
     return item[item_attribute]
+
 
 
 def update_item (table_name, partition_key, item_attribute, new_value):
@@ -37,25 +48,29 @@ def update_item (table_name, partition_key, item_attribute, new_value):
             ExpressionAttributeValues={':val1': new_value}
             )   
     except ClientError as err:
+        # Check if the error is a provisioned throughput exceeded error
+        if err.response['Error']['Code'] == 'ProvisionedThroughputExceededException':
+            raise
+        else:
             logger.error(
                 "Couldn't update visitor counter in the table %s. Here's why: %s: %s",
-                self.table.name,
+                table_name,
                 err.response['Error']['Code'], err.response['Error']['Message'])
             raise
-    else:        
+    else:       
         status_code = update_response['ResponseMetadata']['HTTPStatusCode']
     return status_code
         
 
 def lambda_handler(event, context, session=None):
     if session is None:
-        session = boto3.resource('dynamodb')
+        session = boto3.resource('dynamodb', region_name='us-east-1')
 
-    table_name = event['table_name'] 
+    table_name = 'visitor_counter' #event['table_name'] 
     table = session.Table(table_name)
 
     # get the total visitor count    
-    total_visitor_count = get_item_attr(table, 'visitor_count', 'total_count') #item['total_count']
+    total_visitor_count = get_item_attr(table, 'visitor_count', 'total_count')
     print(f'Total visitor count before update {total_visitor_count}')
     
     incremented_visitor_count = total_visitor_count + 1     
