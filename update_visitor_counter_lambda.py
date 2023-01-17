@@ -2,7 +2,7 @@ import boto3
 import json
 from botocore.exceptions import ClientError
 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 
 def get_item_attr(table_name, partition_key, item_attribute):
     """
@@ -47,8 +47,12 @@ def update_item (table_name, partition_key, item_attribute, new_value):
     return status_code
         
 
-def lambda_handler(event, context):
-    table = dynamodb.Table('visitor_counter')
+def lambda_handler(event, context, session=None):
+    if session is None:
+        session = boto3.resource('dynamodb')
+
+    table_name = event['table_name'] 
+    table = session.Table(table_name)
 
     # get the total visitor count    
     total_visitor_count = get_item_attr(table, 'visitor_count', 'total_count') #item['total_count']
