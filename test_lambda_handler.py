@@ -16,11 +16,6 @@ logger.setLevel(logging.ERROR)
 @mock_dynamodb
 class TestLambdaFunction(unittest.TestCase):
     def setUp(self):
-        # define these as environment variables:
-        self.start_url  = 'https://d-9067a4ec77.awsapps.com/start'
-        self.sso_region = 'us-east-1'
-        self.account_id = '672961757886'
-        self.role_name = 'PowerUserAccess'
         
         session = boto3.Session(profile_name='olley-sso-profile3')
         print('Created a session')
