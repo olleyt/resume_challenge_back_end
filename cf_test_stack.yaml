@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  DynamoDbTableName:
+    Type: String
+    Default: test_visitor_counter
+    Description: Enter DynamoDB table name that will be used for vistor counter. Default is test_counter.
+Resources:
+  DynamoDBTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: 
+        Ref: DynamoDbTableName
+      AttributeDefinitions:
+        - AttributeName: 'visitor_count'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'visitor_count'
+          KeyType: 'HASH'
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: 'test_visitor_counter_lambda'
+      Runtime: 'python3.9'
+      Role: 'arn:aws:iam::672961757886:role/LambdaExecutionReadWriteDynamoDB_visitor_counter_Role'
+      Code:
+        S3Bucket: 'crc-lambda-code-bucket'
+        S3Key: 'test_visitor_counter_lambda.zip'
+      Handler: 'lambda_function.lambda_handler'
+      Timeout: 30
+      Environment:
+        Variables:
+          TABLE_NAME: 
+            Ref: DynamoDbTableName
