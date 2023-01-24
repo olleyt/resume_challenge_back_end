@@ -91,22 +91,14 @@ Resources:
   VisitorCounterMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref VisitorCounterApi
-      ResourceId: !Ref VisitorCounterResource
       HttpMethod: ANY
       AuthorizationType: NONE
+      RestApiId: !Ref VisitorCounterApi
+      ResourceId: !Ref VisitorCounterResource
       Integration:
         Type: AWS_PROXY
+        IntegrationHttpMethod: POST
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
-  VisitorCounterAPICors:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      HttpMethod: OPTIONS
-      AuthorizationType: NONE
-      ResourceId: !Ref VisitorCounterResource
-      RestApiId: !Ref VisitorCounterApi
-      Integration:
-        Type: MOCK
   VisitorCounterAPICorsResponse:
     Type: AWS::ApiGateway::Method
     Properties:
