@@ -45,7 +45,7 @@ Resources:
                     - "dynamodb:UpdateItem"
                     - "dynamodb:DescribeStream"
                     - "dynamodb:GetRecords"
-                  Resource: !GetAtt DynamoDbTableName.Arn  
+                  Resource: !GetAtt DynamoDBTable.Arn  
   DynamoDBTable:
     Type: 'AWS::DynamoDB::Table'
     Properties:
@@ -65,7 +65,7 @@ Resources:
     Properties:
       FunctionName: 'test_visitor_counter_lambda'
       Runtime: 'python3.9'
-      Role: !GettAtt LambdaExecutionRole.Arn
+      Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         S3Bucket: 'crc-lambda-code-bucket'
         S3Key: 'test_visitor_counter_lambda.zip'
@@ -79,13 +79,9 @@ Resources:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: VisitorCounterApi
-      EndpointConfiguration: REGIONAL
-      TracingEnabled: true
-      Cors:
-        AllowOrigin: '''https://test.coolarchitect.link, http://coolarchitect.link'''
-        AllowHeaders: '''''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''''
-        AllowMethods: '''OPTIONS, POST, GET'''
-        MaxAge: 10
+      EndpointConfiguration: 
+        Types:
+          - REGIONAL     
   VisitorCounterResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -101,7 +97,7 @@ Resources:
       AuthorizationType: NONE
       Integration:
         Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionn.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
   VisitorCounterAPICors:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -134,7 +130,7 @@ Resources:
       FunctionName: !GetAtt LambdaFunction.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      Condition:
-        ArnLike: "AWS:SourceArn": !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${VisitorCounterApi}/*" 
+      SourceAccount: !Sub '${AWS::AccountId}'
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${VisitorCounterApi}/*" 
 
       
