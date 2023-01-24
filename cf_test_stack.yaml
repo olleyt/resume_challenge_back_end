@@ -5,6 +5,47 @@ Parameters:
     Default: test_visitor_counter
     Description: Enter DynamoDB table name that will be used for vistor counter. Default is test_counter.
 Resources:
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+        Path: /
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            -
+              Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          -
+            PolicyName: DynamoDBAccessAndLogging
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                -
+                  Sid: AllowLogging
+                  Effect: Allow
+                  Action:
+                    - "logs:CreateLogGroup"
+                    - "logs:CreateLogStream"
+                    - "logs:PutLogEvents"
+                  Resource: "*"
+                -
+                  Sid: ReadWriteFromVisitorCounterDynamoDBTable
+                  Effect: Allow
+                  Action:
+                    - "dynamodb:ConditionCheckItem"
+                    - "dynamodb:PutItem"
+                    - "dynamodb:DescribeTable"
+                    - "dynamodb:GetShardIterator"
+                    - "dynamodb:GetItem"
+                    - "dynamodb:Scan"
+                    - "dynamodb:Query"
+                    - "dynamodb:UpdateItem"
+                    - "dynamodb:DescribeStream"
+                    - "dynamodb:GetRecords"
+                  Resource: !GetAtt DynamoDbTableName.Arn  
   DynamoDBTable:
     Type: 'AWS::DynamoDB::Table'
     Properties:
@@ -24,7 +65,7 @@ Resources:
     Properties:
       FunctionName: 'test_visitor_counter_lambda'
       Runtime: 'python3.9'
-      Role: 'arn:aws:iam::672961757886:role/LambdaExecutionReadWriteDynamoDB_visitor_counter_Role'
+      Role: !GettAtt LambdaExecutionRole.Arn
       Code:
         S3Bucket: 'crc-lambda-code-bucket'
         S3Key: 'test_visitor_counter_lambda.zip'
@@ -34,3 +75,66 @@ Resources:
         Variables:
           TABLE_NAME: 
             Ref: DynamoDbTableName
+  VisitorCounterApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: VisitorCounterApi
+      EndpointConfiguration: REGIONAL
+      TracingEnabled: true
+      Cors:
+        AllowOrigin: '''https://test.coolarchitect.link, http://coolarchitect.link'''
+        AllowHeaders: '''''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''''
+        AllowMethods: '''OPTIONS, POST, GET'''
+        MaxAge: 10
+  VisitorCounterResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref VisitorCounterApi
+      ParentId: !GetAtt VisitorCounterApi.RootResourceId
+      PathPart: visitorcounter
+  VisitorCounterMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref VisitorCounterApi
+      ResourceId: !Ref VisitorCounterResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionn.Arn}/invocations
+  VisitorCounterAPICors:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ResourceId: !Ref VisitorCounterResource
+      RestApiId: !Ref VisitorCounterApi
+      Integration:
+        Type: MOCK
+  VisitorCounterAPICorsResponse:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ResourceId: !Ref VisitorCounterResource
+      RestApiId: !Ref VisitorCounterApi
+      Integration:
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            "application/json": "Empty"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true 
+  APIPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      Condition:
+        ArnLike: "AWS:SourceArn": !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${VisitorCounterApi}/*" 
+
+      
