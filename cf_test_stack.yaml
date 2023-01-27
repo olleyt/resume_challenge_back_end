@@ -4,6 +4,14 @@ Parameters:
     Type: String
     Default: test_visitor_counter
     Description: Enter DynamoDB table name that will be used for vistor counter. Default is test_counter.
+  VisitorCounterAPIResourceName:
+    Type: String
+    Default: visitorcounter
+    Description: API resource name for visitor counter
+  TestingAPIStageName:
+    Type: String
+    Default: testing
+    Description: Default stage to deploy visitor counter API
 Resources:
   LambdaExecutionRole:
     Type: 'AWS::IAM::Role'
@@ -87,7 +95,7 @@ Resources:
     Properties:
       RestApiId: !Ref VisitorCounterApi
       ParentId: !GetAtt VisitorCounterApi.RootResourceId
-      PathPart: visitorcounter
+      PathPart: !Ref VisitorCounterAPIResourceName
   VisitorCounterMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -113,9 +121,9 @@ Resources:
           ResponseModels:
             "application/json": "Empty"
           ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: true
-            method.response.header.Access-Control-Allow-Methods: true
-            method.response.header.Access-Control-Allow-Origin: true 
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false 
   APIPermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -123,6 +131,20 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceAccount: !Sub '${AWS::AccountId}'
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${VisitorCounterApi}/*" 
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${VisitorCounterApi}/*"
+  VisitorCounterApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: VisitorCounterMethod
+    Properties:
+      RestApiId: !Ref VisitorCounterApi
+      StageName: !Ref TestingAPIStageName
+Outputs:
+  ApiInvokeUrl:
+    Description: 'URL of the API endpoint'
+    Value:  !Join [ '/', [ 
+                          !Sub 'https://${VisitorCounterApi}.execute-api.${AWS::Region}.amazonaws.com',
+                          !Ref TestingAPIStageName,
+                          !Ref VisitorCounterAPIResourceName] ] 
+      #Value: !Sub 'https://${API}.execute-api.${AWS::Region}.amazonaws.com/testing'         
 
       
