@@ -46,7 +46,8 @@ jobs:
           python3 -m unittest test_lambda_handler > unit_test.log
           allPassed=$?
           if [ $allPassed -ne 0 ]; then
-              echo "Error"
+              echo "Unit test error. Please investigate logs"
+              exit 1
           fi
           exit $allPassed
           shell: bash
