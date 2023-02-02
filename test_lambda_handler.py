@@ -3,11 +3,12 @@ import json
 import boto3
 import time
 import logging
-from aws_sso_lib import get_boto3_session
+import os
 from moto import mock_dynamodb
 from botocore.exceptions import ClientError
 
-from update_visitor_counter_lambda import lambda_handler, get_item_attr, update_item
+#from update_visitor_counter_lambda import lambda_handler, get_item_attr, update_item
+from lambda_function import lambda_handler, get_item_attr, update_item
 
 # enable logging
 logger = logging.getLogger()
@@ -17,12 +18,12 @@ logger.setLevel(logging.ERROR)
 class TestLambdaFunction(unittest.TestCase):
     def setUp(self):
         
-        session = boto3.Session(profile_name='olley-sso-profile3')
+        session = boto3.Session(profile_name='olley-sso-profile4')
         print('Created a session')
         # print(session.client('sts').get_caller_identity())
 
         self.dynamodb = session.resource('dynamodb', region_name='us-east-1')
-        self.table_name = 'visitor_counter'
+        self.table_name = os.environ.get('TABLE_NAME') #'visitor_counter'
         self.partition_key = 'visitor_count'
         self.item_attribute = 'total_count'
         self.initial_value = 5
@@ -52,32 +53,38 @@ class TestLambdaFunction(unittest.TestCase):
         print('Successfully created a table and put item in it')
         
     def test_lambda_handler(self):
-        event = {"table_name": "visitor_counter"}
+        event = {"table_name": os.environ.get('TABLE_NAME')}
         context = {}
         response = lambda_handler(event, context, self.dynamodb)
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['count'], str(self.initial_value+1))
+        print('[OK] Successfully tested lambda_handler')
         
     def test_get_item_attr(self):
         result = get_item_attr(self.table, self.partition_key, self.item_attribute)
         self.assertEqual(result, self.initial_value)
+        print('[OK] Successfully tested get_item_attr')
         
     def test_update_item(self):
         new_value = 6
         status_code = update_item(self.table, self.partition_key, self.item_attribute, new_value)
         self.assertEqual(status_code, 200)
         self.assertEqual(get_item_attr(self.table, self.partition_key, self.item_attribute), new_value)
+        print('[OK] Successfully tested update_item')
 
     def test_get_item_attr_item_not_found(self):
         with self.assertRaises(KeyError):
             get_item_attr(self.table, 'not_found', 'not found')
+        print('[OK] Successfully tested get_item_attr_item_not_found')    
             
     def test_update_item_provisioned_throughput_exceeded(self):
         # make multiple requests that exceed the table capacity
         for i in range(10):
             update_item(self.table, self.partition_key, self.item_attribute, i)
+        print('[OK] Successfully tested update_item_provisioned_throughput_exceeded')    
 
     def tearDown(self):
-        self.dynamodb.Table(self.table_name).delete()        
+        self.dynamodb.Table(self.table_name).delete()
+        print('Successfully deleted the table')        
     
 
