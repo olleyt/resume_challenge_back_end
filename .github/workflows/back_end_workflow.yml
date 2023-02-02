@@ -44,6 +44,11 @@ jobs:
         run: |
           export TABLE_NAME=${{ vars.TABLE_NAME }} 
           python3 -m unittest test_lambda_handler > unit_test.log
-        shell: bash
+          allPassed=$?
+          if [ $allPassed -ne 0 ]; then
+              echo "Error"
+          fi
+          exit $allPassed
+          shell: bash
 
      
