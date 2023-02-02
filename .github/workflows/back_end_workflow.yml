@@ -1,0 +1,34 @@
+name: Back-end GitHub actions workflow for the resume challenge
+ 
+# The workflow should only trigger on push events to the main branch
+on:
+  push:
+    branches:
+      - main
+env:
+  # Setting an environment variable with the value of a configuration variable
+  env_region: ${{ vars.REGION }}
+
+# Required to get the ID Token that will be used for OIDC
+permissions:
+  id-token: write
+ 
+jobs:
+  deploy-test:    
+    runs-on: ubuntu-latest
+    environment: Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+ 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ secrets.TEST_DEPLOY_ROLE }}
+          role-session-name: OIDCSession
+ 
+      - run: python3 -m unittest test_lambda_handler > unit_test.log
+        shell: bash
+
+     
