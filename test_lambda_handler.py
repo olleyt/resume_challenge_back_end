@@ -17,13 +17,11 @@ logger.setLevel(logging.ERROR)
 @mock_dynamodb
 class TestLambdaFunction(unittest.TestCase):
     def setUp(self):
-        print(boto3.session.Session().available_profiles)
-        session = boto3.Session(profile_name='olley-sso-profile4')
+        session = boto3.session.Session()
         print('Created a session')
-        # print(session.client('sts').get_caller_identity())
 
         self.dynamodb = session.resource('dynamodb', region_name='us-east-1')
-        self.table_name = os.environ.get('TABLE_NAME') #'visitor_counter'
+        self.table_name = os.environ.get('TABLE_NAME') 
         self.partition_key = 'visitor_count'
         self.item_attribute = 'total_count'
         self.initial_value = 5
