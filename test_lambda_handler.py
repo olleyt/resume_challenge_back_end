@@ -17,7 +17,7 @@ logger.setLevel(logging.ERROR)
 @mock_dynamodb
 class TestLambdaFunction(unittest.TestCase):
     def setUp(self):
-        
+        print(boto3.session.Session().available_profiles)
         session = boto3.Session(profile_name='olley-sso-profile4')
         print('Created a session')
         # print(session.client('sts').get_caller_identity())
