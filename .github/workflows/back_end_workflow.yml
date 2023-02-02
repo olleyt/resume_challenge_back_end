@@ -20,7 +20,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
- 
+
+      # Get Python 3.9 version
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"    
+      
+      # Install required libraries
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        shell: bash
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -28,8 +40,7 @@ jobs:
           role-to-assume: ${{ secrets.TEST_DEPLOY_ROLE }}
           role-session-name: OIDCSession
 
-      - run: pip install -r requirements.txt command
-        shell: bash
+      
         
       - run: python3 -m unittest test_lambda_handler > unit_test.log
         shell: bash
