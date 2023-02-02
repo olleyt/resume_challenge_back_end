@@ -27,7 +27,10 @@ jobs:
           aws-region: ${{ vars.REGION }}
           role-to-assume: ${{ secrets.TEST_DEPLOY_ROLE }}
           role-session-name: OIDCSession
- 
+
+      - run: pip install -r requirements. txt command
+        shell: bash
+        
       - run: python3 -m unittest test_lambda_handler > unit_test.log
         shell: bash
 
