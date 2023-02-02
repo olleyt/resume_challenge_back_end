@@ -85,4 +85,6 @@ class TestLambdaFunction(unittest.TestCase):
         self.dynamodb.Table(self.table_name).delete()
         print('Successfully deleted the table')        
     
-
+if __name__ == '__main__':
+    unittest.main(failfast=True)
+    print('Successfully tested all cases')
