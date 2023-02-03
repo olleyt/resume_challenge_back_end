@@ -14,7 +14,7 @@ permissions:
   id-token: write
  
 jobs:
-  deploy-lambda-code:    
+  unit-test-lambda-code:    
     runs-on: ubuntu-latest
     environment: Test
     steps:
@@ -51,6 +51,23 @@ jobs:
           fi
           exit $allPassed
         shell: bash
+
+
+  deploy-lambda-code:
+    needs: unit-test-lambda-code    
+    runs-on: ubuntu-latest
+    environment: Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      # perhaps shall separate policies and use role only for this action
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ secrets.TEST_DEPLOY_ROLE }}
+          role-session-name: OIDCSession  
 
       - name: Pack Lambda and load to S3 S3Bucket
         run: |
