@@ -14,7 +14,7 @@ permissions:
   id-token: write
  
 jobs:
-  deploy-test:    
+  deploy-lambda-code:    
     runs-on: ubuntu-latest
     environment: Test
     steps:
@@ -27,8 +27,8 @@ jobs:
         with:
           python-version: "3.9"    
       
-      # Install required libraries
-      - run: |
+      - name: Install required libraries
+        run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         shell: bash
@@ -52,4 +52,11 @@ jobs:
           exit $allPassed
           shell: bash
 
+      - name: Pack Lambda and load to S3 S3Bucket
+        run: |
+          zip $LAMBDA_FUNCTION.zip lambda_function.py
+          aws s3 cp $LAMBDA_FUNCTION.zip ${{ vars.S3_LAMBDA_SOURCE_BUCKET }}/$LAMBDA_FUNCTION.zip
+          shell: bash
+        env: 
+          LAMBDA_FUNCTION=${{ vars.LAMBDA_NAME }}  
      
