@@ -55,7 +55,7 @@ jobs:
       - name: Pack Lambda and load to S3 S3Bucket
         run: |
           zip $LAMBDA_FUNCTION.zip lambda_function.py
-          aws s3 cp $LAMBDA_FUNCTION.zip s3://${{ vars.S3_LAMBDA_SOURCE_BUCKET }}/$LAMBDA_FUNCTION.zip
+          aws s3 cp $LAMBDA_FUNCTION.zip s3://${{ secrets.S3_LAMBDA_SOURCE_BUCKET }}/$LAMBDA_FUNCTION.zip
           shell: bash
         env: 
           LAMBDA_FUNCTION: ${{ vars.LAMBDA_NAME }}  
