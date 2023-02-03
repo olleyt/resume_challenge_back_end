@@ -76,4 +76,26 @@ jobs:
         shell: bash
         env: 
           LAMBDA_FUNCTION: ${{ vars.LAMBDA_NAME }}  
-     
+
+  deploy-cloudformation_stack:
+    needs: [unit-test-lambda-code, deploy-lambda-code]   
+    runs-on: ubuntu-latest
+    environment: Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      # perhaps shall separate policies and use role only for this action
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ secrets.TEST_DEPLOY_ROLE }}
+          role-session-name: OIDCSession  
+
+      - name: Check CloudFormation stack exists
+        run: |
+          aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --region us-east-1
+        shell: bash
+        env: 
+          LAMBDA_FUNCTION: ${{ vars.LAMBDA_NAME }}
