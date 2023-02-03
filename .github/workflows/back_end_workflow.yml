@@ -58,5 +58,5 @@ jobs:
           aws s3 cp $LAMBDA_FUNCTION.zip ${{ vars.S3_LAMBDA_SOURCE_BUCKET }}/$LAMBDA_FUNCTION.zip
           shell: bash
         env: 
-          LAMBDA_FUNCTION=${{ vars.LAMBDA_NAME }}  
+          LAMBDA_FUNCTION: ${{ vars.LAMBDA_NAME }}  
      
