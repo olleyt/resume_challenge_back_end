@@ -100,6 +100,20 @@ jobs:
           template: cf_test_stack.yaml
           no-fail-on-empty-changeset: "1"
 
+      # update Lambda code from S3 bucket as catch all if CFN does not detect a change
+      # it would be best to have a condition triggering this step but I haven't figured this out yet 
+      - name: Update Lambda code from S3 S3Bucket
+        run: |
+          aws lambda update-function-code \
+            --function-name  $LAMBDA_FUNCTION \
+            --zip-file s3://${{ secrets.S3_LAMBDA_SOURCE_BUCKET }}/$LAMBDA_FUNCTION.zip \
+            --region ${{ vars.REGION }}
+        shell: bash
+        env: 
+          LAMBDA_FUNCTION: ${{ vars.LAMBDA_NAME }}
+
+  # API and Lambda code require an item to be availabe for get and update operations
+  # otherwise, API will throw 'internal error' with code 502 
   put_initial_dynamoDB_item:
     needs: [deploy-cloudformation_stack]   
     runs-on: ubuntu-latest
@@ -127,7 +141,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         shell: bash
-        
+
       - name: Scan DynamoDB table, put the item if the initial item does not exist
         run: |
           export TABLE_NAME=${{ vars.TABLE_NAME }}
