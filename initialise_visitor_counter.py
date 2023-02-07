@@ -18,6 +18,8 @@ def init_counter(table_name, partition_key, item_attribute):
         response = table_name.get_item(
             Key={ partition_key: item_attribute}
             )
+        item = response['Item'] 
+        visit_count = item[item_attribute]   
     except ClientError as err:
         if err.response['Error']['Code'] == 'ValidationException':
             raise KeyError("Item not found")
@@ -34,9 +36,10 @@ def init_counter(table_name, partition_key, item_attribute):
                     partition_key: item_attribute,
                     item_attribute: 0
                     })
-        item = response['Item']
+        visit_count = 0
     
-    return item[item_attribute]
+    return visit_count
+
 
 if __name__ == '__main__':
     # initialise DynamoDB resource
