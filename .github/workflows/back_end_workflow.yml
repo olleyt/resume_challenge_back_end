@@ -106,8 +106,8 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name  $LAMBDA_FUNCTION \
-            --s3-bucket ${{ secrets.S3_LAMBDA_SOURCE_BUCKET }}
-            --s3-key $LAMBDA_FUNCTION.zip 
+            --s3-bucket ${{ secrets.S3_LAMBDA_SOURCE_BUCKET }} \
+            --s3-key $LAMBDA_FUNCTION.zip \
             --region ${{ vars.REGION }}
         shell: bash
         env: 
