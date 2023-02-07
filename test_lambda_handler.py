@@ -14,14 +14,11 @@ from lambda_function import lambda_handler, get_item_attr, update_item
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
 
-# create a session
-session = boto3.session.Session()
-
 # initialise DynamoDB resource
 @mock_dynamodb
 class TestLambdaFunction(unittest.TestCase):
     def setUp(self):
-        #session = boto3.session.Session()
+        session = boto3.session.Session()
         print('Created a session')
 
         self.dynamodb = session.resource('dynamodb', region_name='us-east-1')
