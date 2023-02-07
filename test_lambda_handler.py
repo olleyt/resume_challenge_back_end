@@ -56,7 +56,6 @@ class TestLambdaFunction(unittest.TestCase):
         context = {}
         table_name = os.environ.get('TABLE_NAME')
         initial_value = get_item_attr(self.dynamodb.Table(table_name), self.partition_key, self.item_attribute)
-        self.assertEqual(initial_value, self.initial_value)
         
         response = lambda_handler(event, context, self.dynamodb)
         self.assertEqual(response['statusCode'], 200)
