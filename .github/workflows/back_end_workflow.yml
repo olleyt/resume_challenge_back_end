@@ -99,4 +99,26 @@ jobs:
           name: crc-template3
           template: cf_test_stack.yaml
           no-fail-on-empty-changeset: "1"
+
+  put_initial_dynamoDB_item:
+    needs: [deploy-cloudformation_stack]   
+    runs-on: ubuntu-latest
+    environment: Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      # perhaps shall separate policies and use role only for this action
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ secrets.TEST_DEPLOY_ROLE }}
+          role-session-name: OIDCSession  
+
+      - name: Scan DynamoDB table, put the item if the initial item does not exist
+        run: |
+          export TABLE_NAME=${{ vars.TABLE_NAME }}
+          python3 initialise_visitor_counter.py
+        shell: bash          
     
