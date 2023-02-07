@@ -93,9 +93,10 @@ jobs:
           role-to-assume: ${{ secrets.TEST_DEPLOY_ROLE }}
           role-session-name: OIDCSession  
 
-      - name: Check CloudFormation stack exists
-        run: |
-          aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --region us-east-1
-        shell: bash
-        env: 
-          LAMBDA_FUNCTION: ${{ vars.LAMBDA_NAME }}
+      - name: AWS CloudFormation "Deploy CloudFormation Stack" Action for GitHub Actions
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.1.0
+        with:
+          name: crc-template3
+          template: cf_test_stack.yaml
+          no-fail-on-empty-changeset: "1"
+    
