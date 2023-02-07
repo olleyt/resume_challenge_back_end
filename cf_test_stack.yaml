@@ -67,7 +67,7 @@ Resources:
           KeyType: 'HASH'
       ProvisionedThroughput:
         ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+        WriteCapacityUnits: 5    
   LambdaFunction:
     Type: 'AWS::Lambda::Function'
     Properties:
@@ -89,7 +89,7 @@ Resources:
       Name: VisitorCounterApi
       EndpointConfiguration: 
         Types:
-          - EDGE     
+          - REGIONAL     
   VisitorCounterResource:
     Type: AWS::ApiGateway::Resource
     Properties:
