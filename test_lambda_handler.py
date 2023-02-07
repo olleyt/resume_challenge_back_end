@@ -52,22 +52,15 @@ class TestLambdaFunction(unittest.TestCase):
         print('Successfully created a table and put item in it')
 
     def test_lambda_handler(self):
-        my_east_session = boto3.Session(region_name='us-east-1')
-        dynamodb = my_east_session.resource("dynamodb")
         event = {"table_name": os.environ.get('TABLE_NAME')}
         context = {}
-        response = lambda_handler(event, context, dynamodb)
+        initial_value = get_item_attr(os.environ.get('TABLE_NAME'), self.partition_key, self.item_attribute)
+        self.assertEqual(initial_value, self.initial_value)
+        
+        response = lambda_handler(event, context, self.dynamodb)
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body'])['count'], str(self.initial_value+1))
+        self.assertEqual(json.loads(response['body'])['count'], str(initial_value+1))
         print('[OK] Successfully tested lambda_handler')
-
-    # def test_lambda_handler(self):
-    #     event = {"table_name": os.environ.get('TABLE_NAME')}
-    #     context = {}
-    #     response = lambda_handler(event, context, self.dynamodb)
-    #     self.assertEqual(response['statusCode'], 200)
-    #     self.assertEqual(json.loads(response['body'])['count'], str(self.initial_value+1))
-    #     print('[OK] Successfully tested lambda_handler')
         
     def test_get_item_attr(self):
         result = get_item_attr(self.table, self.partition_key, self.item_attribute)
