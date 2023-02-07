@@ -54,7 +54,8 @@ class TestLambdaFunction(unittest.TestCase):
     def test_lambda_handler(self):
         event = {"table_name": os.environ.get('TABLE_NAME')}
         context = {}
-        initial_value = get_item_attr(os.environ.get('TABLE_NAME'), self.partition_key, self.item_attribute)
+        table_name = os.environ.get('TABLE_NAME')
+        initial_value = get_item_attr(self.dynamodb.Table(table_name), self.partition_key, self.item_attribute)
         self.assertEqual(initial_value, self.initial_value)
         
         response = lambda_handler(event, context, self.dynamodb)
