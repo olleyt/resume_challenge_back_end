@@ -12,8 +12,8 @@ logger.setLevel(logging.ERROR)
 # TODO: remove hardcoding of region
 my_east_session = boto3.Session(region_name = 'us-east-1') 
 dynamodb = my_east_session.resource("dynamodb")
-table_name = os.environ.get('TABLE_NAME')
-table = dynamodb.Table(table_name)
+#table_name = os.environ.get('TABLE_NAME')
+#table = dynamodb.Table(table_name)
 
 def get_item_attr(table_name, partition_key, item_attribute):
     """
@@ -68,12 +68,12 @@ def update_item (table_name, partition_key, item_attribute, new_value):
     return status_code
         
 
-def lambda_handler(event, context, session=None):
-    if session is None:
-            session = my_east_session #boto3.resource('dynamodb', region_name='us-east-1')
+def lambda_handler(event, context, dynamodb_resouce=None):
+    if dynamodb_resouce is None:
+            dynamodb_resouce = dynamodb #boto3.resource('dynamodb', region_name='us-east-1')
 
     table_name = os.environ.get('TABLE_NAME')
-    table = session.Table(table_name) 
+    table = dynamodb_resouce.Table(table_name)
 
     # get the total visitor count    
     total_visitor_count = get_item_attr(table, 'visitor_count', 'total_count')
