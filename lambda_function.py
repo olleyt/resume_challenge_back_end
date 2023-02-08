@@ -69,11 +69,11 @@ def update_item (table_name, partition_key, item_attribute, new_value):
         
 
 def lambda_handler(event, context, session=None):
-    """ if session is None:
-            session = boto3.resource('dynamodb', region_name='us-east-1')
+    if session is None:
+            session = my_east_session #boto3.resource('dynamodb', region_name='us-east-1')
 
     table_name = os.environ.get('TABLE_NAME')
-    table = session.Table(table_name) """
+    table = session.Table(table_name) 
 
     # get the total visitor count    
     total_visitor_count = get_item_attr(table, 'visitor_count', 'total_count')
