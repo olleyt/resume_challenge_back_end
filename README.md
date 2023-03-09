@@ -6,7 +6,7 @@
 
 The architecture of the solution follows AWS best practices described in [AWS Serverless White Paper (Multi-Tier Architectures with Amazon API Gateway and AWS Lambda)](https://docs.aws.amazon.com/whitepapers/latest/serverless-multi-tier-architectures-api-gateway-lambda/introduction.html) 
 
-![Architecture](./assets/CRC_architecture.png) 
+![Architecture](./assets/CRC_architecture.drawio.svg) 
 
 I have added some additional configurations:
 * S3 buckets that hosts website static files is private and CloudFront access it securely with OAC
