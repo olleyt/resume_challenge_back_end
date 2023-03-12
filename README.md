@@ -56,5 +56,10 @@ Another GitHub Actions workflow is configured for the front-end and performs the
   - visitor counter is present on index.html
   - visitor counter value is increasing by 1 with every hit of the website page 
 
+#### The Ideal CI/CD Pipeline
+Ideally, I'd like the pipeline being fully automated for all resources shown in the architecture diagram, as well as incorporating canary deployments.
+It might sound as an overkill for now, but it would be a good practice for DevOps mod for corporate clients:
+![Pipeline](assets/CRC_ideal_pipeline.jpeg)
+
 #### resume_challenge_back_end
 repository for the back-end resume challenge resources
